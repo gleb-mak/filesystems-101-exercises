@@ -12,6 +12,8 @@
 #define MAX_ARG_STRLEN 2000
 #define MAX_ARG_STRINGS 4096
 
+#define MAX_SIZE 1000
+
 void FreeDoubleArray(char** arr, const size_t len) {
 	for (size_t count = 0; count < len; ++count) {
 		if (arr[count] != NULL)
@@ -44,47 +46,51 @@ char* GetNextPID(DIR* dirp) {
 }
 
 size_t ParseDataFromFile(const char* path, char*** arr) {
-	int fd = open(path, O_RDONLY);	
-	if (fd < 0) {
-		report_error(path, 3);
-		exit(3);
-	}
-	char buf[1];
-	ssize_t n;
-	size_t str_pos = 0;
-	size_t elem_pos = 0;
-	char tmp_arr[MAX_ARG_STRINGS][MAX_ARG_STRLEN] = { { '\0'} };	
-	while ((n = read(fd, buf, 1)) != 0 ) {
-		if (n < 0) {
-			report_error(path, 4);
-			exit(4);
+    int fd = open(path, O_RDONLY);
+    if (fd < 0) {
+        report_error(path, 3);
+        exit(3);
+    }
+    char buf[1];
+    ssize_t n;
+    int str_pos = 0;
+    int elem_pos = 0;
+    char tmp_arr[MAX_SIZE][MAX_SIZE] = { { '\0'} };
+    while ((n = read(fd, buf, 1)) != 0 ) {
+        if (n < 0) {
+            report_error(path, 4);
+            exit(4);
+        }
+        if (buf[0] == '\0') {
+            elem_pos++;
+            if (elem_pos >= MAX_SIZE) {
+                report_error(path, 5);
+                break;
+            }
+            str_pos = 0;
+        }
+        else {
+		if (str_pos >= MAX_SIZE) {
+			report_error(path, 5);
+			break;
 		}
-		if (buf[0] == '\0') {
-			elem_pos++;
-			if (elem_pos >= MAX_ARG_STRINGS) {
-				report_error(path, 5);
-				break;
-			}
-			str_pos = 0;
-		}
-		else {
-			tmp_arr[elem_pos][str_pos] = buf[0];
-			str_pos++;
-		}
-	}
-	if (elem_pos == 0) {
-		*arr = (char** )malloc(2 * sizeof(char*));
-		(*arr)[0] = NULL;
-		return 1;
-	}
-	*arr = (char** )malloc((elem_pos + 1) * sizeof(char*));
-	(*arr)[elem_pos] = NULL;
-	for (size_t count = 0; count < elem_pos; ++count) {
-		(*arr)[count] = (char* )malloc((strlen(tmp_arr[count]) + 1) * sizeof(char));
-		memcpy((*arr)[count], tmp_arr[count], strlen(tmp_arr[count]) + 1);
-	}
-	close(fd);
-	return elem_pos + 1;
+            tmp_arr[elem_pos][str_pos] = buf[0];
+            str_pos++;
+        }
+    }
+    if (elem_pos == 0) {
+        *arr = (char** )malloc(2 * sizeof(char*));
+        (*arr)[0] = NULL;
+        return 1;
+    }
+    *arr = (char** )malloc((elem_pos + 1) * sizeof(char*));
+    (*arr)[elem_pos] = NULL;
+    for (int count = 0; count < elem_pos; ++count) {
+        (*arr)[count] = (char* )malloc((strlen(tmp_arr[count]) + 1) * sizeof(char));
+        memcpy((*arr)[count], tmp_arr[count], strlen(tmp_arr[count]) + 1);
+    }
+    close(fd);
+    return elem_pos + 1;
 }
 
 void GetPathToExe(const char* pid_str, char** exe_path) {
@@ -94,9 +100,7 @@ void GetPathToExe(const char* pid_str, char** exe_path) {
     ssize_t nbytes = readlink(symlink_path, tmp_exe, PATH_MAX);
     if (nbytes == -1)
         report_error(symlink_path, 2);
-    size_t len;
-    for (len = 0; tmp_exe[len] != '\0'; ++len) { }
-    len++;
+    size_t len = strlen(tmp_exe) + 1;
     *exe_path = (char* )malloc(len * sizeof(char));
     memcpy(*exe_path, tmp_exe, len);
 }
