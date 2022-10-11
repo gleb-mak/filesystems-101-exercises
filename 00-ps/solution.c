@@ -86,14 +86,18 @@ size_t ParseDataFromFile(const char* path, char*** arr) {
 	return elem_pos + 1;
 }
 
-void GetPathToExe(const char* pid_str, char* exe_path) {
-	char symlink_path[PATH_MAX] = { '\0' };
-	sprintf(symlink_path, "/proc/%s/exe", pid_str);
-	ssize_t len = readlink(symlink_path, exe_path, PATH_MAX);
-	if (len == -1) {
-		report_error(symlink_path, 2);
-		exe_path[0] = '\0';
-	}
+void GetPathToExe(const char* pid_str, char** exe_path) {
+    char symlink_path[PATH_MAX] = { '\0' };
+    char tmp_exe[PATH_MAX] = { '\0' };
+    sprintf(symlink_path, "/proc/%s/exe", pid_str);
+    ssize_t nbytes = readlink(symlink_path, tmp_exe, PATH_MAX);
+    if (nbytes == -1)
+        report_error(symlink_path, 2);
+    size_t len;
+    for (len = 0; tmp_exe[len] != '\0'; ++len) { }
+    len++;
+    *exe_path = (char* )malloc(len * sizeof(char));
+    memcpy(*exe_path, tmp_exe, len);
 }
 
 size_t GetArgv(const char* pid_str, char*** argv) {
@@ -110,22 +114,22 @@ size_t GetEnvp(const char* pid_str, char*** envp) {
 
 void ps(void) {
     char* pid_str;
-    char* exe = (char* )malloc(PATH_MAX * sizeof(char));
-	char** argv;
-	char** envp;
+    char* exe;
+    char** argv;
+    char** envp;
     DIR* dp = opendir("/proc");
-	if (NULL == dp) {
-		report_error("/proc", 1);
-		exit(1);
-	}
-    while ((pid_str = GetNextPID(dp))) {
-		GetPathToExe(pid_str, exe);
-		size_t argv_len = GetArgv(pid_str, &argv);
-		size_t envp_len = GetEnvp(pid_str, &envp);
-		report_process((pid_t)(atoi(pid_str)), exe, argv, envp);
-		FreeDoubleArray(argv, argv_len);
-		FreeDoubleArray(envp, envp_len);
+    if (NULL == dp) {
+        report_error("/proc", 1);
+        exit(1);
     }
-	free(exe);
-	closedir(dp);
+    while ((pid_str = GetNextPID(dp))) {
+        GetPathToExe(pid_str, &exe);
+        size_t argv_len = GetArgv(pid_str, &argv);
+        size_t envp_len = GetEnvp(pid_str, &envp);
+        report_process((pid_t)(atoi(pid_str)), exe, argv, envp);
+        free(exe);
+        FreeDoubleArray(argv, argv_len);
+        FreeDoubleArray(envp, envp_len);
+    }
+    closedir(dp);
 }
