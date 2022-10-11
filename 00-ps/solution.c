@@ -9,7 +9,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define MAX_SIZE 200
+#define MAX_ARG_STRLEN 2000
+#define MAX_ARG_STRINGS 4096
 
 void FreeDoubleArray(char** arr, const size_t len) {
 	for (size_t count = 0; count < len; ++count) {
@@ -52,7 +53,7 @@ size_t ParseDataFromFile(const char* path, char*** arr) {
 	ssize_t n;
 	size_t str_pos = 0;
 	size_t elem_pos = 0;
-	char tmp_arr[MAX_SIZE][MAX_SIZE] = { { '\0'} };	
+	char tmp_arr[MAX_ARG_STRINGS][MAX_ARG_STRLEN] = { { '\0'} };	
 	while ((n = read(fd, buf, 1)) != 0 ) {
 		if (n < 0) {
 			report_error(path, 4);
@@ -60,7 +61,7 @@ size_t ParseDataFromFile(const char* path, char*** arr) {
 		}
 		if (buf[0] == '\0') {
 			elem_pos++;
-			if (elem_pos >= MAX_SIZE) {
+			if (elem_pos >= MAX_ARG_STRINGS) {
 				report_error(path, 5);
 				break;
 			}
