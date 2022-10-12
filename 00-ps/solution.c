@@ -10,9 +10,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define MAX_ARG_STRLEN 2000
-#define MAX_ARG_STRINGS 4096
-
 #define SIZE 100
 
 void FreeDoubleArray(char** arr, const size_t len) {
@@ -53,7 +50,7 @@ size_t ParseDataFromFile(const char* path, char*** arr) {
     int fd = open(path, O_RDONLY);
     if (fd < 0) {
         report_error(path, errno);
-        exit(0);
+        exit(3);
     }
     char buf[1];
     ssize_t n;
@@ -68,16 +65,16 @@ size_t ParseDataFromFile(const char* path, char*** arr) {
     }
     while ((n = read(fd, buf, 1)) != 0 ) {
         if (n < 0) {
-            report_error(path, 4);
-            exit(0);
+            report_error(path, errno);
+            exit(4);
         }
         if (buf[0] == '\0') {
             elem_pos++;
             if (elem_pos == cur_arr_len) {
                 char** new_tmp_arr = (char** )realloc(tmp_arr, 2 * cur_arr_len * sizeof(char* ));
 				if (new_tmp_arr == NULL) {
-					report_error(path, 5);
-					exit(0);
+					report_error(path, errno);
+					exit(5);
 				}
 				tmp_arr = new_tmp_arr;
 				for (size_t count = cur_arr_len; count < 2 * cur_arr_len; ++count) {
@@ -93,8 +90,8 @@ size_t ParseDataFromFile(const char* path, char*** arr) {
 			if (str_pos == cur_str_len) {
 				char* new_str = (char* )realloc(tmp_arr[elem_pos], 2 * cur_str_len * sizeof(char));
 				if (new_str == NULL) {
-					report_error(path, 5);
-					exit(0);
+					report_error(path, errno);
+					exit(6);
 				}
 				tmp_arr[elem_pos] = new_str;
 				memset(&tmp_arr[elem_pos][str_pos], '\0', cur_str_len * sizeof(char));
@@ -153,7 +150,7 @@ void ps(void) {
     DIR* dp = opendir("/proc");
     if (NULL == dp) {
         report_error("/proc", errno);
-        exit(0);
+        exit(1);
     }
     while ((pid_str = GetNextPID(dp))) {
         GetPathToExe(pid_str, &exe);
