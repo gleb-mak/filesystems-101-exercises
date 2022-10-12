@@ -52,7 +52,7 @@ char* GetNextPID(DIR* dirp) {
 size_t ParseDataFromFile(const char* path, char*** arr) {
     int fd = open(path, O_RDONLY);
     if (fd < 0) {
-        report_error(path, 3);
+        report_error(path, errno);
         exit(0);
     }
     char buf[1];
