@@ -12,7 +12,7 @@
 #define MAX_ARG_STRLEN 2000
 #define MAX_ARG_STRINGS 4096
 
-#define MAX_SIZE 1000
+#define SIZE 100
 
 void FreeDoubleArray(char** arr, const size_t len) {
 	for (size_t count = 0; count < len; ++count) {
@@ -53,9 +53,15 @@ size_t ParseDataFromFile(const char* path, char*** arr) {
     }
     char buf[1];
     ssize_t n;
-    int str_pos = 0;
-    int elem_pos = 0;
-    char tmp_arr[MAX_SIZE][MAX_SIZE] = { { '\0'} };
+    size_t str_pos = 0;
+    size_t elem_pos = 0;
+    size_t cur_arr_len = SIZE;
+    size_t cur_str_len = SIZE;
+    char** tmp_arr = (char** )malloc(SIZE * sizeof(char* ));
+    for (size_t count = 0; count < SIZE; ++count) {
+		tmp_arr[count] = (char* )malloc(SIZE * sizeof(char));
+		memset(tmp_arr[count], '\0', SIZE * sizeof(char));
+    }
     while ((n = read(fd, buf, 1)) != 0 ) {
         if (n < 0) {
             report_error(path, 4);
@@ -63,32 +69,55 @@ size_t ParseDataFromFile(const char* path, char*** arr) {
         }
         if (buf[0] == '\0') {
             elem_pos++;
-            if (elem_pos >= MAX_SIZE) {
-                report_error(path, 5);
-                break;
+            if (elem_pos == cur_arr_len) {
+                char** new_tmp_arr = (char** )realloc(tmp_arr, 2 * cur_arr_len * sizeof(char* ));
+				if (new_tmp_arr == NULL) {
+					report_error(path, 5);
+					exit(5);
+				}
+				tmp_arr = new_tmp_arr;
+				for (size_t count = cur_arr_len; count < 2 * cur_arr_len; ++count) {
+					tmp_arr[count] = (char* )malloc(SIZE * sizeof(char));
+					memset(tmp_arr[count], '\0', SIZE * sizeof(char));
+				}
+				cur_arr_len *= 2;
             }
             str_pos = 0;
+	    	cur_str_len = SIZE;
         }
         else {
-		if (str_pos >= MAX_SIZE) {
-			report_error(path, 5);
-			break;
-		}
-            tmp_arr[elem_pos][str_pos] = buf[0];
-            str_pos++;
+			if (str_pos == cur_str_len) {
+				char* new_str = (char* )realloc(tmp_arr[elem_pos], 2 * cur_str_len * sizeof(char));
+				if (new_str == NULL) {
+					report_error(path, 5);
+					exit(5);
+				}
+				tmp_arr[elem_pos] = new_str;
+				memset(&tmp_arr[elem_pos][str_pos], '\0', cur_str_len * sizeof(char));
+				cur_str_len *= 2;
+			}
+        	tmp_arr[elem_pos][str_pos] = buf[0];
+			str_pos++;
         }
     }
     if (elem_pos == 0) {
-        *arr = (char** )malloc(2 * sizeof(char*));
+        *arr = (char** )malloc(sizeof(char*));
         (*arr)[0] = NULL;
+	FreeDoubleArray(tmp_arr, cur_arr_len);
         return 1;
     }
     *arr = (char** )malloc((elem_pos + 1) * sizeof(char*));
     (*arr)[elem_pos] = NULL;
-    for (int count = 0; count < elem_pos; ++count) {
+    for (size_t count = 0; count < elem_pos; ++count) {
         (*arr)[count] = (char* )malloc((strlen(tmp_arr[count]) + 1) * sizeof(char));
         memcpy((*arr)[count], tmp_arr[count], strlen(tmp_arr[count]) + 1);
     }
+	FreeDoubleArray(tmp_arr, cur_arr_len);
+/*	for (size_t count = 0; count < cur_arr_len; ++count) {
+		if (tmp_arr[count] != NULL)
+			free(tmp_arr[count]);
+	}
+	free(tmp_arr);*/
     close(fd);
     return elem_pos + 1;
 }
@@ -128,6 +157,7 @@ void ps(void) {
         exit(1);
     }
     while ((pid_str = GetNextPID(dp))) {
+  // pid_str = GetNextPID(dp);
         GetPathToExe(pid_str, &exe);
         size_t argv_len = GetArgv(pid_str, &argv);
         size_t envp_len = GetEnvp(pid_str, &envp);
