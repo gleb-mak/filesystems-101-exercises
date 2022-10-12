@@ -49,7 +49,7 @@ size_t ParseDataFromFile(const char* path, char*** arr) {
     int fd = open(path, O_RDONLY);
     if (fd < 0) {
         report_error(path, 3);
-        exit(3);
+        exit(0);
     }
     char buf[1];
     ssize_t n;
@@ -65,7 +65,7 @@ size_t ParseDataFromFile(const char* path, char*** arr) {
     while ((n = read(fd, buf, 1)) != 0 ) {
         if (n < 0) {
             report_error(path, 4);
-            exit(4);
+            exit(0);
         }
         if (buf[0] == '\0') {
             elem_pos++;
@@ -73,7 +73,7 @@ size_t ParseDataFromFile(const char* path, char*** arr) {
                 char** new_tmp_arr = (char** )realloc(tmp_arr, 2 * cur_arr_len * sizeof(char* ));
 				if (new_tmp_arr == NULL) {
 					report_error(path, 5);
-					exit(5);
+					exit(0);
 				}
 				tmp_arr = new_tmp_arr;
 				for (size_t count = cur_arr_len; count < 2 * cur_arr_len; ++count) {
@@ -90,7 +90,7 @@ size_t ParseDataFromFile(const char* path, char*** arr) {
 				char* new_str = (char* )realloc(tmp_arr[elem_pos], 2 * cur_str_len * sizeof(char));
 				if (new_str == NULL) {
 					report_error(path, 5);
-					exit(5);
+					exit(0);
 				}
 				tmp_arr[elem_pos] = new_str;
 				memset(&tmp_arr[elem_pos][str_pos], '\0', cur_str_len * sizeof(char));
@@ -113,11 +113,6 @@ size_t ParseDataFromFile(const char* path, char*** arr) {
         memcpy((*arr)[count], tmp_arr[count], strlen(tmp_arr[count]) + 1);
     }
 	FreeDoubleArray(tmp_arr, cur_arr_len);
-/*	for (size_t count = 0; count < cur_arr_len; ++count) {
-		if (tmp_arr[count] != NULL)
-			free(tmp_arr[count]);
-	}
-	free(tmp_arr);*/
     close(fd);
     return elem_pos + 1;
 }
@@ -154,10 +149,9 @@ void ps(void) {
     DIR* dp = opendir("/proc");
     if (NULL == dp) {
         report_error("/proc", 1);
-        exit(1);
+        exit(0);
     }
     while ((pid_str = GetNextPID(dp))) {
-  // pid_str = GetNextPID(dp);
         GetPathToExe(pid_str, &exe);
         size_t argv_len = GetArgv(pid_str, &argv);
         size_t envp_len = GetEnvp(pid_str, &envp);
