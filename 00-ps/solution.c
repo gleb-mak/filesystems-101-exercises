@@ -1,4 +1,5 @@
 #include "solution.h"
+#include <errno.h>
 #include <sys/types.h>
 #include <unistd.h>
 #include <dirent.h>
@@ -37,6 +38,9 @@ char* GetNextPID(DIR* dirp) {
     char* name = NULL;
     struct dirent* dir_info;
     while((dir_info = readdir(dirp))) {
+	if (!errno) {
+		report_error("/proc/", errno);
+	}
         if(IsPID(dir_info->d_name)) {
             name = dir_info->d_name;
             break;
@@ -148,7 +152,7 @@ void ps(void) {
     char** envp;
     DIR* dp = opendir("/proc");
     if (NULL == dp) {
-        report_error("/proc", 1);
+        report_error("/proc", errno);
         exit(0);
     }
     while ((pid_str = GetNextPID(dp))) {
