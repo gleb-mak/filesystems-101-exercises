@@ -27,9 +27,9 @@ int WriteIndirectBlock(int img, unsigned int block_size, off_t offset, unsigned 
 		return -1;
 	}
 	for (unsigned int count = 0; count < block_size / sizeof(uint32_t); ++count) {
-		if (!block_list[count])
+		if (block_list[count] == 0)
 			break;
-		if (!WriteDataFromBlock(img, block_size, block_list[count] * block_size, file_size, out)) {
+		if (WriteDataFromBlock(img, block_size, block_list[count] * block_size, file_size, out) != 0) {
 			free(block_list);
 			return -1;
 		}
@@ -45,9 +45,9 @@ int WriteDoubleBlock(int img, unsigned int block_size, off_t offset, unsigned in
         return -1;
     }
 	for (unsigned int count = 0; count < block_size / sizeof(uint32_t); ++count) {
-        if (!list_of_list[count])
+        if (list_of_list[count] == 0)
             break;
-        if (!WriteIndirectBlock(img, block_size, list_of_list[count] * block_size, file_size, out)) {
+        if (WriteIndirectBlock(img, block_size, list_of_list[count] * block_size, file_size, out) != 0) {
             free(list_of_list);
             return -1;
         }
@@ -79,18 +79,17 @@ int dump_file(int img, int inode_nr, int out)
 	for (unsigned int block_count = 0; block_count < EXT2_N_BLOCKS; ++block_count) {
 		off_t offset = inode.i_block[block_count] * block_size;
 		if (block_count < EXT2_NDIR_BLOCKS) {
-			if (!WriteDataFromBlock(img, block_size, offset, &file_size, out))
+			if (WriteDataFromBlock(img, block_size, offset, &file_size, out) != 0)
 				return errno;
 		}
 		else if (block_count == EXT2_IND_BLOCK) {
-			if (!WriteIndirectBlock(img, block_size, offset, &file_size, out))
+			if (WriteIndirectBlock(img, block_size, offset, &file_size, out) != 0)
 				return errno;
 		}
 		else if (block_count == EXT2_DIND_BLOCK) {
-			if (!WriteDoubleBlock(img, block_size, offset, &file_size, out))
+			if (WriteDoubleBlock(img, block_size, offset, &file_size, out) != 0)
 				return errno;
 		}
-		block_count++;
 	}
 	/* implement me */
 	return 0;
