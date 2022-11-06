@@ -42,8 +42,6 @@ int WriteIndirectBlock(int img, unsigned int block_size, off_t offset, unsigned 
 
 int WriteDoubleBlock(int img, unsigned int block_size, off_t offset, unsigned int* file_size, int out) {
 	uint32_t* list_of_list = (uint32_t* )malloc(block_size);
-/*	for (size_t count = 0; count < block_size / sizeof(uint32_t); ++count) 
-		list_of_list[count] = 0;*/
 	if (pread(img, list_of_list, block_size, offset) == -1) {
         free(list_of_list);
         return -1;
@@ -74,7 +72,7 @@ int dump_file(int img, int inode_nr, int out)
 	unsigned int block_group_num = (inode_nr - 1) / inodes_per_group;
 	unsigned int block_size = 1024 << superblock.s_log_block_size;
 	struct ext2_group_desc group_desc;
-	off_t group_offset = block_size * superblock.s_first_data_block + block_size + block_group_num * sizeof(struct ext2_group_desc);
+	off_t group_offset = 1024 + block_size * superblock.s_blocks_per_group * block_group_num + block_size; //1024 in begining, block_size * superblock.s_blocks_per_group - size of block_group, block_size - size of superblock in needed group block
 	if (pread(img, &group_desc, sizeof(struct ext2_group_desc), group_offset) == -1)
 		return -errno;
 	
