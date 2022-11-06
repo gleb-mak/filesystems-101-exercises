@@ -26,7 +26,6 @@ int WriteIndirectBlock(int img, unsigned int block_size, off_t offset, unsigned 
 		free(block_list);
 		return -1;
 	}
-	while (*file_size > 0) {
 		for (unsigned int count = 0; count < block_size / sizeof(uint32_t); ++count) {
 			if (block_list[count] == 0)
 				break;
@@ -35,7 +34,6 @@ int WriteIndirectBlock(int img, unsigned int block_size, off_t offset, unsigned 
 				return -1;
 			}
 		}
-	}
 	free(block_list);
 	return 0;
 }
@@ -46,7 +44,6 @@ int WriteDoubleBlock(int img, unsigned int block_size, off_t offset, unsigned in
         free(list_of_list);
         return -1;
     }
-	while (*file_size > 0) {
 		for (unsigned int count = 0; count < block_size / sizeof(uint32_t); ++count) {
 			if (list_of_list[count] == 0)
 				break;
@@ -55,7 +52,6 @@ int WriteDoubleBlock(int img, unsigned int block_size, off_t offset, unsigned in
 				return -1;
 			}
 		}
-	}
     free(list_of_list);
 	return 0;
 }
