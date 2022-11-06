@@ -15,7 +15,7 @@ int WriteDataFromBlock(int img, unsigned int block_size, off_t offset, unsigned 
 			free(buff);
 			return -1;
 		}
-		*file_size -= block_size;
+		*file_size -= size;
 		free(buff);
 		return 0;
 }
