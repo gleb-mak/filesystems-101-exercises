@@ -81,7 +81,7 @@ int dump_file(int img, int inode_nr, int out)
 	unsigned int inode_index = (inode_nr - 1) % inodes_per_group;
 	unsigned int inode_size = superblock.s_inode_size;
 	struct ext2_inode inode;
-	off_t inode_offset = group_desc.bg_inode_table + inode_index * inode_size;
+	off_t inode_offset = group_desc.bg_inode_table * block_size + inode_index * inode_size;
 	if (pread(img, &inode, inode_size, inode_offset) == -1) 
 		return -errno;
 	unsigned int file_size = inode.i_size;
