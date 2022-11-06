@@ -58,6 +58,9 @@ int WriteDoubleBlock(int img, unsigned int block_size, off_t offset, unsigned in
 
 int dump_file(int img, int inode_nr, int out)
 {
+	(void) img;
+	(void) inode_nr;
+	(void) out;
 	struct ext2_super_block superblock;
 	if (pread(img, &superblock, sizeof(struct ext2_super_block), 1024) == -1)
 		return errno;
