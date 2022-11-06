@@ -40,6 +40,8 @@ int WriteIndirectBlock(int img, unsigned int block_size, off_t offset, unsigned 
 
 int WriteDoubleBlock(int img, unsigned int block_size, off_t offset, unsigned int* file_size, int out) {
 	uint32_t* list_of_list = (uint32_t* )malloc(block_size);
+	for (size_t count = 0; count < block_size / sizeof(uint32_t); ++count) 
+		list_of_list[count] = 0;
 	if (pread(img, list_of_list, block_size, offset) == -1) {
         free(list_of_list);
         return -1;
