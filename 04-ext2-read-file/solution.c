@@ -86,6 +86,8 @@ int dump_file(int img, int inode_nr, int out)
 		return -errno;
 	unsigned int file_size = inode.i_size;
 	for (unsigned int block_count = 0; block_count < EXT2_N_BLOCKS; ++block_count) {
+		if (inode.i_block[block_count] == 0)
+			break;
 		off_t offset = inode.i_block[block_count] * block_size;
 		if (block_count < EXT2_NDIR_BLOCKS) {
 			if (WriteDataFromBlock(img, block_size, offset, &file_size, out) != 0)
