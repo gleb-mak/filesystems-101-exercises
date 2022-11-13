@@ -249,9 +249,10 @@ int dump_file(int img, const char *path, int out) {
 		cur_name = strtok(NULL, "/");
 	}
 	int file_inode = cur_parent_inode;
-	if (WriteFile(img, file_inode, out) != 0)
+	if (WriteFile(img, file_inode, out) != 0) {
 		free(path_cpy);
 		return -errno;
+	}
 	free(path_cpy);
 	return 0;
 }
