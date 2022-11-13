@@ -244,8 +244,10 @@ int dump_file(int img, const char *path, int out) {
 		cur_parent_inode = GetNextInode(img, cur_parent_inode, cur_name);
 		switch (cur_parent_inode) {
 			case -1:
+				free(path_cpy);
 				return -errno;
 			case 0:
+				free(path_cpy);
 				return -ENOENT;
 		}
 		cur_name = strtok(NULL, "/");
