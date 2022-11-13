@@ -107,14 +107,17 @@ __le32 GetInodeFromBlock(int img, unsigned int block_size, off_t offset, unsigne
 			free(buff);
 			return -1;
 		}
-		struct ext2_dir_entry_2* dir = (struct ext2_dir_entry_2*)buff;
-		while (dir->inode != 0 && size >= 0) {
+		int len = 0;
+		while (dir->inode != 0 && size > 0) {
+			struct ext2_dir_entry_2* dir = (struct ext2_dir_entry_2*)(buff + len);
+			if (dir->inode == 0)
+				break;
 			if (!strcmp(name, dir->name)) {
 				free(buff);
 				return dir->inode;
 			}
 			size -= dir->rec_len;
-			dir = (struct ext2_dir_entry_2*)(buff + dir->rec_len);
+			len += dir->rec_len;
 		}
 		*file_size = (*file_size > block_size) ? *file_size - block_size : 0;
 		free(buff);
@@ -175,7 +178,7 @@ __le32 GetInodeFromDoubleBlock(int img, unsigned int block_size, off_t offset, u
 	return 0;
 }
 
-__le32 GetNextInode(int img, __le32 inode_nr, char* name)
+int GetNextInode(int img, int inode_nr, char* name)
 {
 	struct ext2_super_block superblock;
 	if (pread(img, &superblock, sizeof(struct ext2_super_block), 1024) == -1)
@@ -186,14 +189,14 @@ __le32 GetNextInode(int img, __le32 inode_nr, char* name)
 	struct ext2_group_desc group_desc;
 	off_t group_offset = 1024 + block_size * superblock.s_blocks_per_group * block_group_num + block_size; //1024 in begining, block_size * superblock.s_blocks_per_group - size of block_group, block_size - size of superblock in needed group block
 	if (pread(img, &group_desc, sizeof(struct ext2_group_desc), group_offset) == -1)
-		return -errno;
-	
+		return -1;
+
 	unsigned int inode_index = (inode_nr - 1) % inodes_per_group;
 	unsigned int inode_size = superblock.s_inode_size;
 	struct ext2_inode inode;
 	off_t inode_offset = group_desc.bg_inode_table * block_size + inode_index * inode_size;
 	if (pread(img, &inode, inode_size, inode_offset) == -1) 
-		return -errno;
+		return -1;
 	unsigned int file_size = inode.i_size;
 	for (unsigned int block_count = 0; block_count < EXT2_N_BLOCKS; ++block_count) {
 		if (inode.i_block[block_count] == 0) {
@@ -201,7 +204,7 @@ __le32 GetNextInode(int img, __le32 inode_nr, char* name)
 			return -1;
 		}
 		off_t offset = inode.i_block[block_count] * block_size;
-		__le32 ret = 0;
+		int ret = 0;
 		if (block_count < EXT2_NDIR_BLOCKS) {
 			ret = GetInodeFromBlock(img, block_size, offset, &file_size, name);
 		}
@@ -231,7 +234,7 @@ int dump_file(int img, const char *path, int out) {
 	char* path_cpy = (char *)malloc((strlen(path) + 1) * sizeof(char));
 	strcpy(path_cpy, path);
 	char* cur_name = strtok(path_cpy, "/");
-	__le32 cur_parent_inode = 2; //root
+	int cur_parent_inode = 2; //root
 	while (cur_name != NULL) {
 		cur_parent_inode = GetNextInode(img, cur_parent_inode, cur_name);
 		switch (cur_parent_inode) {
@@ -243,9 +246,10 @@ int dump_file(int img, const char *path, int out) {
 				return -ENOENT;
 		}
 		cur_name = strtok(NULL, "/");
+		//printf("%s ", cur_name);
 	}
-	__le32 file_inode = cur_parent_inode;
-	WriteFile(img, (int)file_inode, out);
+	int file_inode = cur_parent_inode;
+	WriteFile(img, file_inode, out);
 	free(path_cpy);
 	return 0;
 }
