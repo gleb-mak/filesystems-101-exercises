@@ -245,7 +245,7 @@ int dump_file(int img, const char *path, int out) {
 				return -ENOENT;
 		}
 		cur_name = strtok(NULL, "/");
-		//printf("%s ", cur_name);
+		printf("%s ", cur_name);
 	}
 	int file_inode = cur_parent_inode;
 	if (WriteFile(img, file_inode, out) != 0)
