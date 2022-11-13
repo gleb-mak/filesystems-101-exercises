@@ -108,7 +108,7 @@ __le32 GetInodeFromBlock(int img, unsigned int block_size, off_t offset, unsigne
 			return -1;
 		}
 		int len = 0;
-		while (dir->inode != 0 && size > 0) {
+		while (size > 0) {
 			struct ext2_dir_entry_2* dir = (struct ext2_dir_entry_2*)(buff + len);
 			if (dir->inode == 0)
 				break;
