@@ -60,9 +60,6 @@ int WriteDoubleBlock(int img, unsigned int block_size, off_t offset, unsigned in
 
 int WriteFile(int img, int inode_nr, int out)
 {
-	(void) img;
-	(void) inode_nr;
-	(void) out;
 	struct ext2_super_block superblock;
 	if (pread(img, &superblock, sizeof(struct ext2_super_block), 1024) == -1)
 		return -errno;
@@ -104,25 +101,20 @@ int WriteFile(int img, int inode_nr, int out)
 
 
 __le32 GetInodeFromBlock(int img, unsigned int block_size, off_t offset, unsigned int* file_size, char* name) {
-		struct ext2_dir_entry_2* dir = malloc(block_size);
+		uint8_t* buff = (uint8_t* )malloc(block_size);
+		//struct ext2_dir_entry_2* dir = malloc(block_size);
 		int size = (*file_size > block_size) ? block_size : *file_size;
-		if (pread(img, dir, size, offset) == -1) {
-			free(dir);
+		if (pread(img, buff, size, offset) == -1) {
+			free(buff);
 			return -1;
 		}
-		offset += dir->rec_len;
-		size -= dir->rec_len;
+		struct ext2_dir_entry_2* dir = (struct ext2_dir_entry_2*)buff;
 		while (size >= 0) {
-			if (pread(img, dir, size, offset) == -1) {
-				free(dir);
-				return -1;
-			}
-			offset += dir->rec_len;
-			size -= dir->rec_len;
 			if (!strcmp(name, dir->name)) {
 				free(dir);
 				return dir->inode;
 			}
+			dir = (struct ext2_dir_entry_2*)(buff + dir->rec_len);
 		}
 		*file_size = (*file_size > block_size) ? *file_size - block_size : 0;
 		free(dir);
