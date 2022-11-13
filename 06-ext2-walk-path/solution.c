@@ -110,14 +110,14 @@ __le32 GetInodeFromBlock(int img, unsigned int block_size, off_t offset, unsigne
 		struct ext2_dir_entry_2* dir = (struct ext2_dir_entry_2*)buff;
 		while (dir->inode != 0 && size >= 0) {
 			if (!strcmp(name, dir->name)) {
-				free(dir);
+				free(buff);
 				return dir->inode;
 			}
 			size -= dir->rec_len;
 			dir = (struct ext2_dir_entry_2*)(buff + dir->rec_len);
 		}
 		*file_size = (*file_size > block_size) ? *file_size - block_size : 0;
-		free(dir);
+		free(buff);
 		return 0;
 }
 
