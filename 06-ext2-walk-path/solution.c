@@ -100,7 +100,7 @@ int WriteFile(int img, int inode_nr, int out)
 }
 
 
-__le32 GetInodeFromBlock(int img, unsigned int block_size, off_t offset, unsigned int* file_size, char* name) {
+int GetInodeFromBlock(int img, unsigned int block_size, off_t offset, unsigned int* file_size, char* name) {
 		uint8_t* buff = (uint8_t* )malloc(block_size);
 		int size = (*file_size > block_size) ? block_size : *file_size;
 		if (pread(img, buff, size, offset) == -1) {
@@ -123,7 +123,7 @@ __le32 GetInodeFromBlock(int img, unsigned int block_size, off_t offset, unsigne
 		return 0;
 }
 
-__le32 GetInodeFromIndirectBlock(int img, unsigned int block_size, off_t offset, unsigned int* file_size, char* name) {
+int GetInodeFromIndirectBlock(int img, unsigned int block_size, off_t offset, unsigned int* file_size, char* name) {
 	uint32_t* block_list = (uint32_t* )malloc(block_size);
 	if (pread(img, block_list, block_size, offset) == -1) {
 		free(block_list);
@@ -150,7 +150,7 @@ __le32 GetInodeFromIndirectBlock(int img, unsigned int block_size, off_t offset,
 	return 0;
 }
 
-__le32 GetInodeFromDoubleBlock(int img, unsigned int block_size, off_t offset, unsigned int* file_size, char* name) {
+int GetInodeFromDoubleBlock(int img, unsigned int block_size, off_t offset, unsigned int* file_size, char* name) {
 	uint32_t* list_of_list = (uint32_t* )malloc(block_size);
 	if (pread(img, list_of_list, block_size, offset) == -1) {
         free(list_of_list);
@@ -250,6 +250,7 @@ int dump_file(int img, const char *path, int out) {
 	}
 	int file_inode = cur_parent_inode;
 	if (WriteFile(img, file_inode, out) != 0)
+		free(path_cpy);
 		return -errno;
 	free(path_cpy);
 	return 0;
