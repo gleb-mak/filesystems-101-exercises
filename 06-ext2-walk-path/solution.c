@@ -233,7 +233,7 @@ int dump_file(int img, const char *path, int out) {
 	char* path_cpy = (char *)malloc((strlen(path) + 1) * sizeof(char));
 	strcpy(path_cpy, path);
 	char* cur_name = strtok(path_cpy, "/");
-	int cur_parent_inode = 2; //root
+	int cur_parent_inode = EXT2_ROOT_INO; //root
 	while (cur_name != NULL) {
 		cur_parent_inode = GetNextInode(img, cur_parent_inode, cur_name);
 		switch (cur_parent_inode) {
@@ -245,7 +245,7 @@ int dump_file(int img, const char *path, int out) {
 				return -ENOENT;
 		}
 		cur_name = strtok(NULL, "/");
-		printf("%s ", cur_name);
+//		printf("%s ", cur_name);
 	}
 	int file_inode = cur_parent_inode;
 	if (WriteFile(img, file_inode, out) != 0)
