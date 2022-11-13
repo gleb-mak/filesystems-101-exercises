@@ -102,18 +102,18 @@ int WriteFile(int img, int inode_nr, int out)
 
 __le32 GetInodeFromBlock(int img, unsigned int block_size, off_t offset, unsigned int* file_size, char* name) {
 		uint8_t* buff = (uint8_t* )malloc(block_size);
-		//struct ext2_dir_entry_2* dir = malloc(block_size);
 		int size = (*file_size > block_size) ? block_size : *file_size;
 		if (pread(img, buff, size, offset) == -1) {
 			free(buff);
 			return -1;
 		}
 		struct ext2_dir_entry_2* dir = (struct ext2_dir_entry_2*)buff;
-		while (size >= 0) {
+		while (dir->inode != 0 && size >= 0) {
 			if (!strcmp(name, dir->name)) {
 				free(dir);
 				return dir->inode;
 			}
+			size -= dir->rec_len;
 			dir = (struct ext2_dir_entry_2*)(buff + dir->rec_len);
 		}
 		*file_size = (*file_size > block_size) ? *file_size - block_size : 0;
