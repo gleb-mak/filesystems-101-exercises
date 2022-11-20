@@ -45,7 +45,16 @@ void FreeNodeWithChilds(Node* root) {
 }
 
 int IsNodeOrChildsContains(Node* root, int x) {
-	for (int count = 0; count < root->cur_keys_num; ++count) {
+	int i = 0;
+	while (i < root->cur_keys_num && x > root->keys[i]) {
+		i++;
+	}
+	if (root->keys[i] == x)
+		return 1;
+	if (root->is_leaf)
+		return 0;
+	return IsNodeOrChildsContains(root->childs[i], x);
+	/*for (int count = 0; count < root->cur_keys_num; ++count) {
 		if (x == root->keys[count])
 			return 1;
 		if (x < root->keys[count]) {
@@ -54,7 +63,7 @@ int IsNodeOrChildsContains(Node* root, int x) {
 			return IsNodeOrChildsContains(root->childs[count], x);
 		}
 	}
-	return 0;
+	return 0;*/
 }	
 
 int IsNodeFull(struct Node* node) {
