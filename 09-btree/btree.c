@@ -322,7 +322,7 @@ bool btree_contains(struct btree *t, int x)
 {
 	(void) t;
 	(void) x;
-	if (btree_is_empty())
+	if (btree_is_empty(t))
 		return false;
 	return IsNodeOrChildsContains(t->root, x);
 /*	if (IsNodeOrChildsContains(t->root, x))
