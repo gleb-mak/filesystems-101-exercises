@@ -14,7 +14,7 @@ struct Node {
 };
 
 Node* CreateNode(int min_keys_num, int is_leaf) {
-	min_keys_num--;
+	min_keys_num++;
 	Node* node = (Node* )malloc(sizeof(Node));
 	node->keys = (int* )malloc((2 * min_keys_num - 1) * sizeof(int));
 	node->cur_keys_num = 0;
