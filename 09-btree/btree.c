@@ -54,7 +54,7 @@ int IsNodeOrChildsContains(Node* root, int x) {
 			return IsNodeOrChildsContains(root->childs[count], x);
 		}
 	}
-	return 0;
+	return IsNodeOrChildsContains(root->childs[root->cur_keys_num], x);
 }	
 
 int IsNodeFull(struct Node* node) {
