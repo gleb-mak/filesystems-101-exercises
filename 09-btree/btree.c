@@ -45,16 +45,19 @@ void FreeNodeWithChilds(Node* root) {
 }
 
 int IsNodeOrChildsContains(Node* root, int x) {
-	for (int count = 0; count < root->cur_keys_num; ++count) {
-		if (x == root->keys[count])
+	int count;
+    for (count = 0; count < root->cur_keys_num; count++)
+    {
+        if (!root->is_leaf)
+            if (IsNodeOrChildsContains(root->childs[count], x))
+				return 1;
+		if (root->keys[count] == x)
 			return 1;
-		if (x < root->keys[count]) {
-			if (root->is_leaf)
-				return 0;
-			return IsNodeOrChildsContains(root->childs[count], x);
-		}
-	}
-	return IsNodeOrChildsContains(root->childs[root->cur_keys_num], x);
+    }
+    if (!root->is_leaf)
+		if (IsNodeOrChildsContains(root->childs[count], x))
+			return 1;
+	return 0;
 }	
 
 int IsNodeFull(struct Node* node) {
@@ -109,6 +112,7 @@ void InsertNotFull(struct Node* root, int x) {
 		}
 	}
 }
+
 
 void Merge(Node* node, int index) {
 	Node* child = node->childs[index];
@@ -180,12 +184,72 @@ void Fill(Node* node, int index) {
 	}
 }
 
+void RemoveFromLeaf(Node* node, int index) {
+    for (int count = index + 1; count < node->cur_keys_num; ++count) {
+        node->keys[count -1] = node->keys[count];
+    }
+    node->cur_keys_num--;
+}
+
+void RemoveFromNode(struct Node* root, int x);
+
+void RemoveFromInternal(Node* root, int count) {
+    int x = root->keys[count];
+    if (root->childs[count]->cur_keys_num >= root->min_keys_num) {
+        Node* cur = root->childs[count];
+        while (!cur->is_leaf) {
+            cur = cur->childs[cur->cur_keys_num];
+        }
+        int pred = cur->keys[cur->cur_keys_num - 1];
+        root->keys[count] = pred;
+        RemoveFromNode(root->childs[count], pred);
+    }
+    else if (root->childs[count + 1]->cur_keys_num >= root->min_keys_num) {
+        Node* cur = root->childs[count + 1];
+        while (!cur->is_leaf)
+            cur = cur->childs[0];
+        int suc = cur->keys[0];
+        root->keys[count] = suc;
+        RemoveFromNode(root->childs[count + 1], suc);
+    }
+    else {
+        Merge(root, count);
+        RemoveFromNode(root->childs[count], x);
+    }
+
+}
+
+int FindKey(Node* node, int x) {
+    int i = 0;
+    while (i < node->cur_keys_num && node->keys[i] < x)
+        i++;
+    return i;
+}
+
+
 void RemoveFromNode(struct Node* root, int x) {
 	if (root == NULL)
-		return;
-	int min_keys_num = root->min_keys_num;
-
-	if (root->is_leaf) {
+        return;
+    int min_keys_num = root->min_keys_num;
+	int index = FindKey(root, x);
+    if (index < root->cur_keys_num && root->keys[index] == x) {
+        if (root->is_leaf)
+            RemoveFromLeaf(root, index);
+        else
+            RemoveFromInternal(root, index);
+    }
+    else {
+        if (root->is_leaf)
+            return;
+        bool flag = ( (index == root->cur_keys_num)? true : false );
+        if (root->childs[index]->cur_keys_num < min_keys_num)
+            Fill(root, index);
+        if (flag && index > min_keys_num)
+            RemoveFromNode(root->childs[index - 1], x);
+        else
+            RemoveFromNode(root->childs[index], x);
+    }
+/*	if (root->is_leaf) {
 		for (int count = 0; count < root->cur_keys_num; ++count) {
 			if (root->keys[count] == x) {
 				for (int i = count; i < root->cur_keys_num - 1; ++i) {
@@ -224,8 +288,8 @@ void RemoveFromNode(struct Node* root, int x) {
 				return;
 			}
 			else {
-//				if (root->is_leaf)
-//					return;
+				if (root->is_leaf)
+					return;
 				bool flag = (count == root->cur_keys_num) ? true : false;
 				if (root->childs[count]->cur_keys_num < min_keys_num)
 					Fill(root, count);
@@ -235,7 +299,7 @@ void RemoveFromNode(struct Node* root, int x) {
 					RemoveFromNode(root->childs[count], x);
 			}
 		}
-	}
+	}*/
 }
 
 //---------------------------------------------------------------------------
@@ -406,3 +470,4 @@ bool btree_iter_next(struct btree_iter *i, int *x)
 	}
 	return false;
 }
+
