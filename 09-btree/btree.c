@@ -45,18 +45,7 @@ void FreeNodeWithChilds(Node* root) {
 }
 
 int IsNodeOrChildsContains(Node* root, int x) {
-	int i = 0;
-	if (root == NULL)
-		return 0;
-	while (i < root->cur_keys_num && x > root->keys[i]) {
-		i++;
-	}
-	if (root->keys[i] == x)
-		return 1;
-	if (root->is_leaf)
-		return 0;
-	return IsNodeOrChildsContains(root->childs[i], x);
-	/*for (int count = 0; count < root->cur_keys_num; ++count) {
+	for (int count = 0; count < root->cur_keys_num; ++count) {
 		if (x == root->keys[count])
 			return 1;
 		if (x < root->keys[count]) {
@@ -65,7 +54,7 @@ int IsNodeOrChildsContains(Node* root, int x) {
 			return IsNodeOrChildsContains(root->childs[count], x);
 		}
 	}
-	return 0;*/
+	return 0;
 }	
 
 int IsNodeFull(struct Node* node) {
@@ -192,7 +181,10 @@ void Fill(Node* node, int index) {
 }
 
 void RemoveFromNode(struct Node* root, int x) {
+	if (root == NULL)
+		return;
 	int min_keys_num = root->min_keys_num;
+
 	if (root->is_leaf) {
 		for (int count = 0; count < root->cur_keys_num; ++count) {
 			if (root->keys[count] == x) {
@@ -232,9 +224,12 @@ void RemoveFromNode(struct Node* root, int x) {
 				return;
 			}
 			else {
+//				if (root->is_leaf)
+//					return;
+				bool flag = (count == root->cur_keys_num) ? true : false;
 				if (root->childs[count]->cur_keys_num < min_keys_num)
 					Fill(root, count);
-				if (count >= root->cur_keys_num)
+				if (flag && count > root->cur_keys_num)
 					RemoveFromNode(root->childs[count - 1], x);
 				else
 					RemoveFromNode(root->childs[count], x);
@@ -254,7 +249,7 @@ struct btree
 struct btree* btree_alloc(unsigned int L)
 {
 	(void) L;
-	L--;
+//	L--;
 	btree* new_btree = (btree* )malloc(sizeof(btree));
 	new_btree->min_keys_num = L;
 	new_btree->root = NULL;
