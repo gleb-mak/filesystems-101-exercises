@@ -46,6 +46,8 @@ void FreeNodeWithChilds(Node* root) {
 
 int IsNodeOrChildsContains(Node* root, int x) {
 	int i = 0;
+	if (root == NULL)
+		return 0;
 	while (i < root->cur_keys_num && x > root->keys[i]) {
 		i++;
 	}
