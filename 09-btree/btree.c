@@ -14,7 +14,6 @@ struct Node {
 };
 
 Node* CreateNode(int min_keys_num, int is_leaf) {
-	min_keys_num++;
 	Node* node = (Node* )malloc(sizeof(Node));
 	node->keys = (int* )malloc((2 * min_keys_num - 1) * sizeof(int));
 	node->cur_keys_num = 0;
@@ -255,6 +254,7 @@ struct btree
 struct btree* btree_alloc(unsigned int L)
 {
 	(void) L;
+	L--;
 	btree* new_btree = (btree* )malloc(sizeof(btree));
 	new_btree->min_keys_num = L;
 	new_btree->root = NULL;
