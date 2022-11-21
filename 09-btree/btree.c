@@ -414,15 +414,15 @@ struct btree_iter* btree_iter_start(struct btree *t)
 		depth++;
 	}
 	iter->cur_depth = depth;
-	iter->path = (Node** )malloc(depth * sizeof(Node*));
-	iter->path_indexes = (int*)malloc(depth * sizeof(int));
+	iter->path = (Node** )malloc((depth + 1) * sizeof(Node*));
+	iter->path_indexes = (int*)malloc((depth + 1) * sizeof(int));
 	node = t->root;
 	int count = 0;
 	while (!node->is_leaf) {
 		iter->path[count] = node;
-		count++;
-        node = node->childs[0];
 		iter->path_indexes[count] = 0;
+        node = node->childs[0];
+		count++;
     }
 	return iter;
 }
@@ -442,7 +442,33 @@ bool btree_iter_next(struct btree_iter *i, int *x)
 	int cur_depths = i->cur_depth;
 	Node* cur_node = i->path[cur_depths];
 	int idx = i->path_indexes[cur_depths];
-	if (i->path_indexes[cur_depths] < cur_node->cur_keys_num - 1) {
+	if (cur_node->is_leaf) {
+		if (idx < cur_node->cur_keys_num) {
+			*x = cur_node->keys[idx];
+			i->path_indexes[cur_depths]++;
+			return true;
+		}
+		else {
+			while (i->path_indexes[cur_depths - 1] == (i->path[cur_depths - 1])->cur_keys_num) {
+				if (cur_depths == 0)
+					return false;
+				cur_depths--;
+			}
+			*x = (i->path[cur_depths - 1])->keys[i->path_indexes[cur_depths - 1]];
+			cur_depths--;
+			i->path_indexes[cur_depths]++;
+			return true;
+		}
+	}
+	else {
+		//if (idx < cur_node->cur->keys_num) {
+			*x = (cur_node->childs[idx])->keys[i->path_indexes[cur_depths + 1]];
+			i->path_indexes[cur_depths + 1]++;
+			cur_depths++;
+			return true;
+		//}
+	}
+	/*if (i->path_indexes[cur_depths] < cur_node->cur_keys_num - 1) {
 		if (cur_node->is_leaf) {
 			*x = cur_node->keys[i->path_indexes[cur_depths] + 1];
 			i->path_indexes[cur_depths]++;
@@ -464,10 +490,10 @@ bool btree_iter_next(struct btree_iter *i, int *x)
 			i->path_indexes[cur_depths - 1]++;
 			i->cur_depth++;
 		//}
-	/*	else {
+		else {
 			cur_node = cur_node->childs[i->path_indexes[cur_depths]]
-		}*/
-	}
+		}
+	}*/
 	return false;
 }
 
