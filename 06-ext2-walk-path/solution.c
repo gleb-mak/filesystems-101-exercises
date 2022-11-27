@@ -112,7 +112,7 @@ int GetInodeFromBlock(int img, unsigned int block_size, off_t offset, unsigned i
 			struct ext2_dir_entry_2* dir = (struct ext2_dir_entry_2*)(buff + len);
 			if (dir->inode == 0)
 				break;
-			if (!strcmp(name, dir->name)) {
+			if (!strncmp(name, dir->name, strlen(name)) && dir->name_len == strlen(name)) {
 				free(buff);
 				return dir->inode;
 			}
