@@ -49,7 +49,8 @@ void ReportUsingFiles(const char* pid_str) {
 	while ((dir_info = readdir(fd))) {
 		if (!errno) {
 			report_error(fd_path, errno);
-			exit(1);
+			continue;
+//			exit(1);
 		}
 		if ((!IsNumber(dir_info->d_name)) || (dir_info->d_type != DT_LNK))
 			continue;
@@ -59,6 +60,7 @@ void ReportUsingFiles(const char* pid_str) {
 		ssize_t nbytes = readlink(symlink_path, tmp_file, PATH_MAX);
 		if (nbytes == -1) {
 			report_error(symlink_path, errno);
+			continue;
 //			exit(1);
 		}
 		size_t len = strlen(tmp_file) + 1;
