@@ -47,6 +47,7 @@ void ReportUsingFiles(const char* pid_str) {
 	DIR* fd = opendir(fd_path);
 	if (NULL == fd) {
 		report_error(fd_path, errno);
+		exit(1);
 	}
 	struct dirent* dir_info;
 	while (1) {
