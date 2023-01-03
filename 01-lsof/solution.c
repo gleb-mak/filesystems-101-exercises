@@ -27,7 +27,7 @@ char* GetNextPID(DIR* dirp) {
     while((dir_info = readdir(dirp))) {
 		if (!errno) {
 			report_error("/proc/", errno);
-			exit(1);
+//			exit(1);
 		}
         if(IsNumber(dir_info->d_name)) {
             name = dir_info->d_name;
@@ -43,7 +43,7 @@ void ReportUsingFiles(const char* pid_str) {
 	DIR* fd = opendir(fd_path);
 	if (NULL == fd) {
 		report_error(fd_path, errno);
-		exit(1);
+//		exit(1);
 	}
 	struct dirent* dir_info;
 	while ((dir_info = readdir(fd))) {
@@ -59,7 +59,7 @@ void ReportUsingFiles(const char* pid_str) {
 		ssize_t nbytes = readlink(symlink_path, tmp_file, PATH_MAX);
 		if (nbytes == -1) {
 			report_error(symlink_path, errno);
-			exit(1);
+//			exit(1);
 		}
 		size_t len = strlen(tmp_file) + 1;
 		char* file_path = (char* )malloc(len * sizeof(char));
