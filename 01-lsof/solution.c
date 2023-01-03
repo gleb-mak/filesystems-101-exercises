@@ -33,9 +33,6 @@ char* GetNextPID(DIR* dirp) {
             else
                 report_error("/proc/", errno);
         }
-		if (errno) {
-			report_error("/proc/", errno);
-		}
         if(IsNumber(dir_info->d_name)) {
             name = dir_info->d_name;
             break;
