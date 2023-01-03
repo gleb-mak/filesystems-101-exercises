@@ -43,11 +43,11 @@ char* GetNextPID(DIR* dirp) {
 
 void ReportUsingFiles(const char* pid_str) {
 	char fd_path[PATH_MAX] = { '\0' };
-	sprintf(fd_path, "/proc/%s/fd", pid_str);
+	sprintf(fd_path, "/proc/%s/fd/", pid_str);
 	DIR* fd = opendir(fd_path);
 	if (NULL == fd) {
 		report_error(fd_path, errno);
-		exit(1);
+		return;
 	}
 	struct dirent* dir_info;
 	while (1) {
