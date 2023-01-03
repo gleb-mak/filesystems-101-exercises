@@ -50,9 +50,10 @@ void ReportUsingFiles(const char* pid_str) {
 		errno = 0;
 		dir_info = readdir(fd);
 		if (NULL == dir_info) {
-			if (!errno)
+			if (errno)
+				break;
+			else
 				report_error(fd_path, errno);
-			break;
 		}
 		if ((!IsNumber(dir_info->d_name)) || (dir_info->d_type != DT_LNK))
 			continue;
