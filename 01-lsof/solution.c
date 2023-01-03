@@ -60,7 +60,6 @@ void ReportUsingFiles(const char* pid_str) {
 		ssize_t nbytes = readlink(symlink_path, tmp_file, PATH_MAX);
 		if (nbytes == -1) {
 			report_error(symlink_path, errno);
-			continue;
 //			exit(1);
 		}
 		size_t len = strlen(tmp_file) + 1;
