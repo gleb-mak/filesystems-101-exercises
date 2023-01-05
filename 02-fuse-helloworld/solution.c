@@ -11,7 +11,7 @@
 
 
 static int hello_getattr(const char *path, struct stat *st, struct fuse_file_info *info) {
-	void(info);
+	info = info;
 	memset(st, 0, sizeof(struct stat));
 	st->st_mode = S_IFREG | 0400;
 	st->st_nlink = 1;
@@ -27,12 +27,12 @@ static int hello_getattr(const char *path, struct stat *st, struct fuse_file_inf
 }
 
 static int hello_write(const char *path, const char *buf, size_t size, off_t offset, struct fuse_file_info *info) {
-	(void)path; (void)buf; (void)size; (void)offset; (void)info;
+	path = path; buf = buf; size = size; offset = offset; info = info;
 	return -EROFS;
 }
 
 static int hello_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info *info, enum fuse_readdir_flags flags) {
-	void(offset); void(info); void(flags);
+	offset = offset; info = info; flags = flags;
 	filler(buf, ".", NULL, 0);
 	filler(buf, "..", NULL, 0);
 	if (!strcmp(path, "/")) {
@@ -42,7 +42,7 @@ static int hello_readdir(const char *path, void *buf, fuse_fill_dir_t filler, of
 }
 
 static int hello_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *info) {
-	void(info);
+	info = info;
 	if (strcmp(path, "/"))
 		return -1;
 	char data[20] = { '\0' };
