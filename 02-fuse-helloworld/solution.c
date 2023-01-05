@@ -51,7 +51,7 @@ static int hello_read(const char *path, char *buf, size_t size, off_t offset, st
 	if ((size_t)offset >= len)
 		return 0;
 	len = (len - (size_t)offset < size) ? len - (size_t)offset : size;
-	memset(buf, data + offset, len);
+	memcpy(buf, data + offset, len);
 	return len;
 }
 
