@@ -1,4 +1,4 @@
-#include "solution.h"
+#include <solution.h>
 
 #include <errno.h>
 #include <fuse.h>
@@ -10,7 +10,7 @@
 #include <stdlib.h>
 
 
-int hello_getattr(const char *path, struct stat *st, struct fuse_file_info *info) {
+static int hello_getattr(const char *path, struct stat *st, struct fuse_file_info *info) {
 	void(info);
 	memset(st, 0, sizeof(struct stat));
 	st->st_mode = S_IFREG | 0400;
@@ -26,12 +26,12 @@ int hello_getattr(const char *path, struct stat *st, struct fuse_file_info *info
 	return 0;
 }
 
-int hello_write(const char *path, const char *buf, size_t size, off_t offset, struct fuse_file_info *info) {
+static int hello_write(const char *path, const char *buf, size_t size, off_t offset, struct fuse_file_info *info) {
 	(void)path; (void)buf; (void)size; (void)offset; (void)info;
 	return -EROFS;
 }
 
-int hello_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info *info, enum fuse_readdir_flags flags) {
+static int hello_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info *info, enum fuse_readdir_flags flags) {
 	void(offset); void(info); void(flags);
 	filler(buf, ".", NULL, 0);
 	filler(buf, "..", NULL, 0);
@@ -41,7 +41,7 @@ int hello_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t off
 	return 0;
 }
 
-int hello_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *info) {
+static int hello_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *info) {
 	void(info);
 	if (strcmp(path, "/"))
 		return -1;
@@ -59,7 +59,7 @@ static const struct fuse_operations hellofs_ops = {
 	.getattr = hello_getattr,
     .readdir = hello_readdir,
     .read = hello_read,
-	.write = hello_write
+	.write = hello_write,
 };
 
 int helloworld(const char *mntp) {
