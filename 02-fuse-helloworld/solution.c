@@ -33,10 +33,10 @@ static int hello_write(const char *path, const char *buf, size_t size, off_t off
 
 static int hello_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info *info, enum fuse_readdir_flags flags) {
 	offset = offset; info = info; flags = flags;
-	filler(buf, ".", NULL, 0);
-	filler(buf, "..", NULL, 0);
+	filler(buf, ".", NULL, 0, 0);
+	filler(buf, "..", NULL, 0, 0);
 	if (!strcmp(path, "/")) {
-		filler(buf, "hello", NULL, 0);
+		filler(buf, "hello", NULL, 0, 0);
 	}
 	return 0;
 }
