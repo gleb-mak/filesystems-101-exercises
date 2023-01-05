@@ -48,7 +48,7 @@ static int hello_read(const char *path, char *buf, size_t size, off_t offset, st
 	char data[20] = { '\0' };
 	sprintf(data, "hello, %d\n", fuse_get_context()->pid);
 	size_t len = strlen(data);
-	if (offset >= len)
+	if ((size_t)offset >= len)
 		return 0;
 	len = (len - (size_t)offset < size) ? len - (size_t)offset : size;
 	memset(buf, data + offset, len);
