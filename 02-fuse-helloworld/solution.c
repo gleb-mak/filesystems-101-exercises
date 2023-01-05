@@ -47,10 +47,10 @@ static int hello_read(const char *path, char *buf, size_t size, off_t offset, st
 		return -1;
 	char data[20] = { '\0' };
 	sprintf(data, "hello, %d\n", fuse_get_context()->pid);
-	int len = strlen(data);
+	size_t len = strlen(data);
 	if (offset >= len)
 		return 0;
-	len = (len - offset < size) ? len - offset : size;
+	len = (len - (size_t)offset < size) ? len - (size_t)offset : size;
 	memset(buf, data + offset, len);
 	return len;
 }
